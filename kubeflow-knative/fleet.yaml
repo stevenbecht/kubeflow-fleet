@@ -1,0 +1,38 @@
+# Knative Serving (required by KServe)
+name: kubeflow-knative
+defaultNamespace: knative-serving
+
+dependsOn:
+- name: kubeflow-namespace
+- name: istio-gateway
+- name: kubeflow-knative-crds
+
+kustomize:
+  dir: .
+
+diff:
+  comparePatches:
+  - apiVersion: admissionregistration.k8s.io/v1
+    kind: MutatingWebhookConfiguration
+    name: webhook.serving.knative.dev
+    operations:
+    - op: replace
+      path: /webhooks
+      value: "[]"
+  - apiVersion: admissionregistration.k8s.io/v1
+    kind: ValidatingWebhookConfiguration
+    name: validation.webhook.serving.knative.dev
+    operations:
+    - op: replace
+      path: /webhooks
+      value: "[]"
+
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: knative-serving

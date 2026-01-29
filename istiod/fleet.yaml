@@ -1,0 +1,98 @@
+# Istiod Control Plane Bundle
+# Deploys Istio control plane (istiod)
+name: istiod
+defaultNamespace: istio-system
+
+# Depends on istio-base for CRDs
+dependsOn:
+- name: istio-system
+
+helm:
+  releaseName: istiod
+  repo: https://istio-release.storage.googleapis.com/charts
+  chart: istiod
+  version: "1.28.0"
+  values:
+    pilot:
+      replicaCount: 1
+      autoscaleEnabled: false
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+    global:
+      proxy:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+      accessLogFile: /dev/stdout
+    meshConfig:
+      defaultConfig:
+        discoveryAddress: istiod.istio-system.svc:15012
+      defaultProviders:
+        metrics:
+        - prometheus
+      enablePrometheusMerge: true
+      rootNamespace: istio-system
+      trustDomain: cluster.local
+      extensionProviders:
+      - name: oauth2-proxy
+        envoyExtAuthzHttp:
+          service: oauth2-proxy.oauth2-proxy.svc.cluster.local
+          port: 80
+          pathPrefix: /oauth2/auth
+          includeRequestHeadersInCheck:
+          - authorization
+          - cookie
+          headersToUpstreamOnAllow:
+          - authorization
+          - path
+          - x-auth-request-email
+          - x-auth-request-groups
+          - x-auth-request-user
+          headersToDownstreamOnDeny:
+          - content-type
+          - set-cookie
+
+# Istiod mutates webhook CABundle after install; ignore to avoid perpetual drift
+diff:
+  comparePatches:
+  - apiVersion: admissionregistration.k8s.io/v1
+    kind: MutatingWebhookConfiguration
+    name: istio-sidecar-injector
+    operations:
+    - op: add
+      path: /webhooks/0/clientConfig/caBundle
+      value: ""
+  - apiVersion: admissionregistration.k8s.io/v1
+    kind: ValidatingWebhookConfiguration
+    name: istio-validator-istio-system
+    operations:
+    - op: replace
+      path: /webhooks
+      value: "[]"
+  - apiVersion: admissionregistration.k8s.io/v1
+    kind: ValidatingWebhookConfiguration
+    name: istiod-default-validator
+    operations:
+    - op: add
+      path: /webhooks/0/clientConfig/caBundle
+      value: ""
+
+# Target clusters with kubeflow label
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: istio

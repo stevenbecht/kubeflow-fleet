@@ -1,0 +1,93 @@
+# Katib Experiment CRD
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: experiments.kubeflow.org
+spec:
+  group: kubeflow.org
+  names:
+    kind: Experiment
+    listKind: ExperimentList
+    plural: experiments
+    singular: experiment
+    shortNames:
+    - exp
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        x-kubernetes-preserve-unknown-fields: true
+    additionalPrinterColumns:
+    - name: Type
+      type: string
+      jsonPath: .status.completionTime
+    - name: Status
+      type: string
+      jsonPath: .status.conditions[-1:].type
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+---
+# Katib Trial CRD
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: trials.kubeflow.org
+spec:
+  group: kubeflow.org
+  names:
+    kind: Trial
+    listKind: TrialList
+    plural: trials
+    singular: trial
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        x-kubernetes-preserve-unknown-fields: true
+    additionalPrinterColumns:
+    - name: Type
+      type: string
+      jsonPath: .status.conditions[-1:].type
+    - name: Status
+      type: string
+      jsonPath: .status.conditions[-1:].status
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+---
+# Katib Suggestion CRD
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: suggestions.kubeflow.org
+spec:
+  group: kubeflow.org
+  names:
+    kind: Suggestion
+    listKind: SuggestionList
+    plural: suggestions
+    singular: suggestion
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        x-kubernetes-preserve-unknown-fields: true

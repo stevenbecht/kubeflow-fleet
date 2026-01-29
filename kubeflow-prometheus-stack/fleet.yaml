@@ -1,0 +1,118 @@
+# kube-prometheus-stack Bundle
+# Deploys: Prometheus + Grafana for Kubeflow metrics
+name: kubeflow-prometheus-stack
+defaultNamespace: monitoring
+
+dependsOn:
+- name: istiod
+
+helm:
+  releaseName: kube-prometheus-stack
+  repo: https://prometheus-community.github.io/helm-charts
+  chart: kube-prometheus-stack
+  version: "80.13.3"
+  values:
+    crds:
+      enabled: true
+
+    # k3s single-node: disable control-plane components that aren't reachable
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeEtcd:
+      enabled: false
+
+    alertmanager:
+      enabled: false
+
+    prometheusOperator:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 300m
+          memory: 256Mi
+
+    prometheus:
+      prometheusSpec:
+        # Serve Prometheus UI under /prometheus via Istio VirtualService
+        # Update this if you change the Kubeflow host/port.
+        externalUrl: "https://kf.demo:30443/prometheus"
+        routePrefix: /prometheus
+        retention: 3d
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: "1"
+            memory: 2Gi
+        # allow ServiceMonitors/PodMonitors across namespaces
+        serviceMonitorSelectorNilUsesHelmValues: false
+        serviceMonitorSelector: {}
+        serviceMonitorNamespaceSelector: {}
+        podMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelector: {}
+        podMonitorNamespaceSelector: {}
+        probeSelectorNilUsesHelmValues: false
+        probeSelector: {}
+        probeNamespaceSelector: {}
+        scrapeConfigSelectorNilUsesHelmValues: false
+        scrapeConfigSelector: {}
+        scrapeConfigNamespaceSelector: {}
+
+    grafana:
+      adminUser: admin
+      adminPassword: admin
+      defaultDashboardsEnabled: true
+      grafana.ini:
+        server:
+          root_url: "%(protocol)s://%(domain)s/grafana/"
+          serve_from_sub_path: true
+        security:
+          allow_embedding: true
+        auth:
+          disable_login_form: true
+        auth.proxy:
+          enabled: true
+          header_name: kubeflow-userid
+          header_property: email
+          auto_sign_up: true
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+
+    kube-state-metrics:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
+
+    prometheus-node-exporter:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
+
+# Target clusters with kubeflow label
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: monitoring

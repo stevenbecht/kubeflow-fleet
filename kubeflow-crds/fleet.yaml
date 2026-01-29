@@ -1,0 +1,19 @@
+# Kubeflow CRDs Bundle
+# Deploys all CRDs needed by Kubeflow components
+name: kubeflow-crds
+kustomize:
+  dir: .
+
+dependsOn:
+- name: istio-gateway
+
+# Target clusters with kubeflow label
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: crds

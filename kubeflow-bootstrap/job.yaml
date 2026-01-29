@@ -1,0 +1,124 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kubeflow-bootstrap
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kubeflow-bootstrap
+    spec:
+      serviceAccountName: kubeflow-bootstrap
+      restartPolicy: OnFailure
+      containers:
+      - name: bootstrap
+        image: bitnami/kubectl:latest
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -euo pipefail
+
+          RELEASE_NAME=kubeflow-namespace
+          RELEASE_NAMESPACE=default
+          OBJECTSET_ID=${RELEASE_NAMESPACE}-${RELEASE_NAME}
+
+          retry() {
+            n=0
+            until "$@"; do
+              n=$((n+1))
+              if [ "$n" -ge 10 ]; then
+                echo "command failed after ${n} attempts: $*" >&2
+                return 1
+              fi
+              sleep 2
+            done
+          }
+
+          wait_ns_ready() {
+            ns="$1"
+            for _ in $(seq 1 30); do
+              phase=$(kubectl get ns "$ns" -o jsonpath='{.status.phase}' 2>/dev/null || true)
+              if [ -z "$phase" ] || [ "$phase" = "Active" ]; then
+                return 0
+              fi
+              if [ "$phase" = "Terminating" ]; then
+                sleep 2
+                continue
+              fi
+              return 0
+            done
+            echo "namespace $ns stuck in terminating phase" >&2
+            return 1
+          }
+
+          ensure_ns() {
+            if ! kubectl get ns "$1" >/dev/null 2>&1; then
+              retry kubectl create ns "$1"
+            fi
+            wait_ns_ready "$1"
+          }
+
+          annotate_ns() {
+            retry kubectl annotate ns "$1" \
+              meta.helm.sh/release-name="$RELEASE_NAME" \
+              meta.helm.sh/release-namespace="$RELEASE_NAMESPACE" \
+              objectset.rio.cattle.io/id="$OBJECTSET_ID" \
+              --overwrite
+          }
+
+          label_common() {
+            retry kubectl label ns "$1" \
+              app.kubernetes.io/managed-by=Helm \
+              app.kubernetes.io/part-of=kubeflow \
+              --overwrite
+          }
+
+          ensure_ns kubeflow
+          label_common kubeflow
+          retry kubectl label ns kubeflow \
+            control-plane=kubeflow \
+            istio-injection=enabled \
+            pod-security.kubernetes.io/enforce=privileged \
+            pod-security.kubernetes.io/audit=privileged \
+            pod-security.kubernetes.io/warn=privileged \
+            --overwrite
+          annotate_ns kubeflow
+
+          ensure_ns kubeflow-system
+          label_common kubeflow-system
+          retry kubectl label ns kubeflow-system \
+            control-plane=kubeflow \
+            istio-injection=enabled \
+            pod-security.kubernetes.io/enforce=restricted \
+            --overwrite
+          annotate_ns kubeflow-system
+
+          ensure_ns knative-serving
+          label_common knative-serving
+          retry kubectl label ns knative-serving \
+            app.kubernetes.io/name=knative-serving \
+            app.kubernetes.io/version=1.16.2 \
+            istio-injection=enabled \
+            pod-security.kubernetes.io/enforce=privileged \
+            pod-security.kubernetes.io/audit=privileged \
+            pod-security.kubernetes.io/warn=privileged \
+            --overwrite
+          annotate_ns knative-serving
+
+          ensure_ns auth
+          label_common auth
+          retry kubectl label ns auth \
+            pod-security.kubernetes.io/enforce=restricted \
+            --overwrite
+          annotate_ns auth
+
+          ensure_ns oauth2-proxy
+          label_common oauth2-proxy
+          retry kubectl label ns oauth2-proxy \
+            pod-security.kubernetes.io/enforce=restricted \
+            --overwrite
+          annotate_ns oauth2-proxy

@@ -1,0 +1,17 @@
+# Knative Serving CRDs (must be installed before serving components)
+name: kubeflow-knative-crds
+
+defaultNamespace: knative-serving
+
+kustomize:
+  dir: .
+
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: knative-serving-crds

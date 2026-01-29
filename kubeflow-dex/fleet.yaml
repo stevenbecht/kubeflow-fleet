@@ -1,0 +1,20 @@
+# Kubeflow Dex Bundle
+# Deploys: Dex IdP for Kubeflow (default static user)
+name: kubeflow-dex
+defaultNamespace: auth
+
+dependsOn:
+- name: kubeflow-base
+
+kustomize:
+  dir: .
+
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: dex

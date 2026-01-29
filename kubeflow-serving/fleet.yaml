@@ -1,0 +1,23 @@
+# Kubeflow Serving (KServe) Bundle
+name: kubeflow-serving
+defaultNamespace: kubeflow
+
+dependsOn:
+- name: cert-manager
+- name: kubeflow-base
+- name: kubeflow-oauth2-proxy
+- name: kubeflow-knative
+- name: kubeflow-crds
+
+kustomize:
+  dir: .
+
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: kserve

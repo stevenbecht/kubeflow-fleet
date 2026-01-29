@@ -1,0 +1,19 @@
+# Default user Profile + namespace
+name: kubeflow-user-namespace
+defaultNamespace: kubeflow
+
+dependsOn:
+- name: kubeflow-profiles
+
+kustomize:
+  dir: .
+
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: user-namespace
