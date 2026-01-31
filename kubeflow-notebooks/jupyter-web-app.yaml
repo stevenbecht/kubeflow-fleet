@@ -389,7 +389,8 @@ data:
         readOnly: false
 
         # a list of additional data volumes to be created and/or mounted
-        value: []
+        value:
+        - access-ml-pipeline
         #value:
         #  - mount: /home/jovyan/datavol-1
         #    newPvc:
