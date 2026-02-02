@@ -8,7 +8,7 @@ metadata:
 spec:
   # Update this to your Git repository URL
   repo: https://github.com/stevenbecht/kubeflow-fleet
-  branch: v1.11.0up
+  branch: master
 
   # Paths to scan for bundles (order doesn't matter - Fleet uses dependsOn)
   paths:
