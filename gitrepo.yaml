@@ -17,6 +17,7 @@ spec:
   - istio-system
   - istiod
   - istio-gateway
+  # NOTE: kubeflow-bootstrap intentionally excluded (non-idempotent)
   # Kubeflow components
   - kubeflow-namespace
   - kubeflow-base
