@@ -4,7 +4,6 @@ metadata:
   name: kubeflow-bootstrap
 spec:
   backoffLimit: 3
-  ttlSecondsAfterFinished: 300
   template:
     metadata:
       labels:
@@ -103,10 +102,16 @@ spec:
             app.kubernetes.io/name=knative-serving \
             app.kubernetes.io/version=1.16.2 \
             istio-injection=enabled \
+            --overwrite
+          # Rancher namespace admission may reject pod-security label changes for
+          # this service account. Continue so ownership annotations are still set.
+          if ! kubectl label ns knative-serving \
             pod-security.kubernetes.io/enforce=privileged \
             pod-security.kubernetes.io/audit=privileged \
             pod-security.kubernetes.io/warn=privileged \
-            --overwrite
+            --overwrite; then
+            echo "warning: failed to set pod-security labels on knative-serving; continuing" >&2
+          fi
           annotate_ns knative-serving
 
           ensure_ns auth
