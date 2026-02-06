@@ -257,6 +257,7 @@ data:
         # the list of available container images in the dropdown
         options:
         - ghcr.io/kubeflow/kubeflow/notebook-servers/jupyter-scipy:v1.10.0
+        - kf-registry.local:5000/kubeflow/kf-notebook-demos:v0.1.0
         - ghcr.io/kubeflow/kubeflow/notebook-servers/jupyter-pytorch-full:v1.10.0
         - ghcr.io/kubeflow/kubeflow/notebook-servers/jupyter-pytorch-cuda-full:v1.10.0
         - ghcr.io/kubeflow/kubeflow/notebook-servers/jupyter-pytorch-gaudi-full:v1.10.0
@@ -389,8 +390,7 @@ data:
         readOnly: false
 
         # a list of additional data volumes to be created and/or mounted
-        value:
-        - access-ml-pipeline
+        value: []
         #value:
         #  - mount: /home/jovyan/datavol-1
         #    newPvc:
@@ -510,9 +510,8 @@ data:
 
         # the list of PodDefault names that are selected by default
         # (take care to ensure these PodDefaults exist in Profile Namespaces)
-        value: []
-        #value:
-        #  - my-pod-default
+        value:
+        - access-ml-pipeline
 
       ################################################################
       # Environment
