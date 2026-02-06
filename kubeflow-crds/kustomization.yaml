@@ -9,6 +9,7 @@ resources:
 - katib-crds.yaml
 - training-operator-crds.yaml
 - viewer-crd.yaml
+- pvcviewer-crd.yaml
 - kserve-crds.yaml
 - kserve-extra-crds.yaml
 - metacontroller-crds.yaml
