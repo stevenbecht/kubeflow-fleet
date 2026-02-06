@@ -170,6 +170,9 @@ Edit the `mlpipeline-minio-artifact` Secret in `kubeflow-pipelines/upstream.yaml
 ### Add more notebook images
 
 Edit the `spawner_ui_config.yaml` ConfigMap in `kubeflow-notebooks/jupyter-web-app.yaml`.
+This repo already adds a demo image option:
+- `kf-registry.local:5000/kubeflow/kf-notebook-demos:v0.1.0`
+- Build assets live in `samples/kubeflow-notebooks/image/`
 
 ### Configure external ingress
 
