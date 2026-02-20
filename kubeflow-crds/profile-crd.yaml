@@ -1,0 +1,110 @@
+# Profile CRD - represents a user's namespace
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: profiles.kubeflow.org
+spec:
+  group: kubeflow.org
+  names:
+    kind: Profile
+    listKind: ProfileList
+    plural: profiles
+    singular: profile
+  scope: Cluster
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            type: object
+            properties:
+              owner:
+                type: object
+                properties:
+                  kind:
+                    type: string
+                  name:
+                    type: string
+              resourceQuotaSpec:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              plugins:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    kind:
+                      type: string
+                    spec:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    additionalPrinterColumns:
+    - name: Owner
+      type: string
+      jsonPath: .spec.owner.name
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+  - name: v1beta1
+    served: true
+    storage: false
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            type: object
+            properties:
+              owner:
+                type: object
+                properties:
+                  kind:
+                    type: string
+                  name:
+                    type: string
+              resourceQuotaSpec:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              plugins:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    kind:
+                      type: string
+                    spec:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    additionalPrinterColumns:
+    - name: Owner
+      type: string
+      jsonPath: .spec.owner.name
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp

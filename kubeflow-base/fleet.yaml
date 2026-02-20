@@ -1,0 +1,22 @@
+# Kubeflow Base Bundle
+# Deploys: namespaces, roles, network policies, Istio resources, and TLS certs
+name: kubeflow-base
+defaultNamespace: kubeflow
+
+dependsOn:
+- name: kubeflow-namespace
+- name: cert-manager
+- name: istio-gateway
+
+kustomize:
+  dir: .
+
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: base

@@ -1,0 +1,3 @@
+right now we have two clusters:
+- rancher management (~/.kube/rancher-mgmt.yaml)
+- downstream cluster 1 - ds1 for running the workload (~/.kube/config)

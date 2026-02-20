@@ -1,0 +1,17 @@
+# Kubeflow bootstrap bundle
+# Ensures required namespaces exist and are owned by the kubeflow-namespace release
+name: kubeflow-bootstrap
+defaultNamespace: kube-system
+
+kustomize:
+  dir: .
+
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: bootstrap

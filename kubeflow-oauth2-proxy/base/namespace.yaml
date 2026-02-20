@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: oauth2-proxy
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: kubeflow-oauth2-proxy
+    meta.helm.sh/release-namespace: oauth2-proxy
+  labels:
+    pod-security.kubernetes.io/enforce: restricted

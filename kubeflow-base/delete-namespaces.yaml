@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubeflow
+$patch: delete
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubeflow-system
+$patch: delete

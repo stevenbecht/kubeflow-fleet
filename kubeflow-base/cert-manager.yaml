@@ -1,0 +1,85 @@
+# cert-manager bootstrap: self-signed CA + wildcard cert for kf.demo
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: kf-selfsigned
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kf-root-ca
+  namespace: cert-manager
+spec:
+  isCA: true
+  commonName: kf.demo
+  secretName: kf-root-ca
+  subject:
+    organizations:
+    - kf.demo
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  duration: 8760h
+  renewBefore: 720h
+  issuerRef:
+    name: kf-selfsigned
+    kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: kf-ca
+spec:
+  ca:
+    secretName: kf-root-ca
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kubeflow-wildcard
+  namespace: kubeflow
+spec:
+  secretName: kubeflow-tls
+  commonName: kf.demo
+  dnsNames:
+  - kf.demo
+  - '*.kf.demo'
+  issuerRef:
+    name: kf-ca
+    kind: ClusterIssuer
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  duration: 720h
+  renewBefore: 120h
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kubeflow-wildcard
+  namespace: istio-system
+spec:
+  secretName: kubeflow-tls
+  commonName: kf.demo
+  dnsNames:
+  - kf.demo
+  - '*.kf.demo'
+  issuerRef:
+    name: kf-ca
+    kind: ClusterIssuer
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  duration: 720h
+  renewBefore: 120h
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubeflow-ca
+  namespace: kubeflow
+  annotations:
+    cert-manager.io/inject-ca-from: cert-manager/kf-root-ca
+data: {}

@@ -1,0 +1,16 @@
+# Kubeflow Namespaces Bundle
+name: kubeflow-namespace
+defaultNamespace: default
+
+kustomize:
+  dir: .
+
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: namespace

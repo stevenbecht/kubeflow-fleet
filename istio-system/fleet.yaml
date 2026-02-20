@@ -1,0 +1,40 @@
+# Istio Bundle
+# Deploys Istio for Kubeflow on single-node k3s
+name: istio-system
+defaultNamespace: istio-system
+
+helm:
+  releaseName: istio-base
+  takeOwnership: true
+  repo: https://istio-release.storage.googleapis.com/charts
+  chart: base
+  version: "1.28.0"
+
+# Istio validator webhook CABundle is mutated by istiod after install
+diff:
+  comparePatches:
+  - apiVersion: admissionregistration.k8s.io/v1
+    kind: ValidatingWebhookConfiguration
+    name: istio-validator-istio-system
+    operations:
+    - op: add
+      path: /webhooks/0/clientConfig/caBundle
+      value: ""
+  - apiVersion: admissionregistration.k8s.io/v1
+    kind: ValidatingWebhookConfiguration
+    name: istiod-default-validator
+    operations:
+    - op: replace
+      path: /webhooks
+      value: "[]"
+
+# Target clusters with kubeflow label
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: istio

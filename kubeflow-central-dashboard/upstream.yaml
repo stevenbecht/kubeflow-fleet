@@ -1,0 +1,411 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: centraldashboard
+    app.kubernetes.io/component: centraldashboard
+    app.kubernetes.io/name: centraldashboard
+    kustomize.component: centraldashboard
+  name: centraldashboard
+  namespace: kubeflow
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app: centraldashboard
+    app.kubernetes.io/component: centraldashboard
+    app.kubernetes.io/name: centraldashboard
+    kustomize.component: centraldashboard
+  name: centraldashboard
+  namespace: kubeflow
+rules:
+- apiGroups:
+  - ""
+  - app.k8s.io
+  resources:
+  - applications
+  - pods
+  - pods/exec
+  - pods/log
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  - configmaps
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: centraldashboard
+    app.kubernetes.io/component: centraldashboard
+    app.kubernetes.io/name: centraldashboard
+    kustomize.component: centraldashboard
+  name: centraldashboard
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  - namespaces
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: centraldashboard
+    app.kubernetes.io/component: centraldashboard
+    app.kubernetes.io/name: centraldashboard
+    kustomize.component: centraldashboard
+  name: centraldashboard
+  namespace: kubeflow
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: centraldashboard
+subjects:
+- kind: ServiceAccount
+  name: centraldashboard
+  namespace: kubeflow
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: centraldashboard
+    app.kubernetes.io/component: centraldashboard
+    app.kubernetes.io/name: centraldashboard
+    kustomize.component: centraldashboard
+  name: centraldashboard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: centraldashboard
+subjects:
+- kind: ServiceAccount
+  name: centraldashboard
+  namespace: kubeflow
+---
+apiVersion: v1
+data:
+  links: |-
+    {
+        "menuLinks": [
+            {
+                "icon": "book",
+                "link": "/jupyter/",
+                "text": "Notebooks",
+                "type": "item"
+            },
+            {
+                "icon": "assessment",
+                "link": "/tensorboards/",
+                "text": "TensorBoards",
+                "type": "item"
+            },
+            {
+                "icon": "device:storage",
+                "link": "/volumes/",
+                "text": "Volumes",
+                "type": "item"
+            },
+            {
+                "icon": "kubeflow:katib",
+                "link": "/katib/",
+                "text": "Katib Experiments",
+                "type": "item"
+            },
+            {
+                "type": "item",
+                "link": "/kserve-endpoints/",
+                "text": "KServe Endpoints",
+                "icon": "kubeflow:models"
+            },
+            {
+                "icon": "kubeflow:pipeline-centered",
+                "items": [
+                    {
+                        "link": "/pipeline/#/pipelines",
+                        "text": "Pipelines",
+                        "type": "item"
+                    },
+                    {
+                        "link": "/pipeline/#/experiments",
+                        "text": "Experiments",
+                        "type": "item"
+                    },
+                    {
+                        "link": "/pipeline/#/runs",
+                        "text": "Runs",
+                        "type": "item"
+                    },
+                    {
+                        "link": "/pipeline/#/recurringruns",
+                        "text": "Recurring Runs",
+                        "type": "item"
+                    },
+                    {
+                        "link": "/pipeline/#/artifacts",
+                        "text": "Artifacts",
+                        "type": "item"
+                    },
+                    {
+                        "link": "/pipeline/#/executions",
+                        "text": "Executions",
+                        "type": "item"
+                    }
+                ],
+                "text": "Pipelines",
+                "type": "section"
+            },
+            {
+                "icon": "monitoring",
+                "items": [
+                    {
+                        "link": "/grafana/",
+                        "text": "Grafana",
+                        "type": "item"
+                    },
+                    {
+                        "link": "/prometheus/",
+                        "text": "Prometheus",
+                        "type": "item"
+                    }
+                ],
+                "text": "Monitoring",
+                "type": "section"
+            }
+        ],
+        "externalLinks": [],
+        "documentationItems": [
+            {
+                "desc": "The Kubeflow website",
+                "link": "https://www.kubeflow.org/",
+                "text": "Kubeflow Website"
+            },
+            {
+                "desc": "Documentation for Kubeflow Pipelines",
+                "link": "https://www.kubeflow.org/docs/components/pipelines/",
+                "text": "Kubeflow Pipelines Documentation"
+            },
+            {
+                "desc": "Documentation for Kubeflow Notebooks",
+                "link": "https://www.kubeflow.org/docs/components/notebooks/",
+                "text": "Kubeflow Notebooks Documentation"
+            },
+            {
+                "desc": "Documentation for Kubeflow Training Operator",
+                "link": "https://www.kubeflow.org/docs/components/training/",
+                "text": "Kubeflow Training Operator Documentation"
+            },
+            {
+                "desc": "Documentation for Katib",
+                "link": "https://www.kubeflow.org/docs/components/katib/",
+                "text": "Katib Documentation"
+            }
+        ],
+        "quickLinks": [
+            {
+                "desc": "Kubeflow Notebooks",
+                "link": "/jupyter/new",
+                "text": "Create a new Notebook"
+            },
+            {
+                "desc": "Kubeflow Pipelines",
+                "link": "/pipeline/#/pipelines",
+                "text": "Upload a Pipeline"
+            },
+            {
+                "desc": "Pipelines",
+                "link": "/pipeline/#/runs",
+                "text": "View Pipeline Runs"
+            }
+        ]
+    }
+  settings: |-
+    {
+      "DASHBOARD_FORCE_IFRAME": true
+    }
+kind: ConfigMap
+metadata:
+  labels:
+    app: centraldashboard
+    app.kubernetes.io/component: centraldashboard
+    app.kubernetes.io/name: centraldashboard
+    kustomize.component: centraldashboard
+  name: centraldashboard-config
+  namespace: kubeflow
+---
+apiVersion: v1
+data:
+  CD_CLUSTER_DOMAIN: cluster.local
+  CD_COLLECT_METRICS: "true"
+  CD_REGISTRATION_FLOW: "false"
+  CD_USERID_HEADER: kubeflow-userid
+  CD_USERID_PREFIX: ""
+kind: ConfigMap
+metadata:
+  labels:
+    app: centraldashboard
+    app.kubernetes.io/component: centraldashboard
+    app.kubernetes.io/name: centraldashboard
+    kustomize.component: centraldashboard
+  name: centraldashboard-parameters
+  namespace: kubeflow
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: centraldashboard
+    app.kubernetes.io/component: centraldashboard
+    app.kubernetes.io/name: centraldashboard
+    kustomize.component: centraldashboard
+  name: centraldashboard
+  namespace: kubeflow
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8082
+  selector:
+    app: centraldashboard
+    app.kubernetes.io/component: centraldashboard
+    app.kubernetes.io/name: centraldashboard
+    kustomize.component: centraldashboard
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: centraldashboard
+    app.kubernetes.io/component: centraldashboard
+    app.kubernetes.io/name: centraldashboard
+    kustomize.component: centraldashboard
+  name: centraldashboard
+  namespace: kubeflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: centraldashboard
+      app.kubernetes.io/component: centraldashboard
+      app.kubernetes.io/name: centraldashboard
+      kustomize.component: centraldashboard
+  template:
+    metadata:
+      labels:
+        app: centraldashboard
+        app.kubernetes.io/component: centraldashboard
+        app.kubernetes.io/name: centraldashboard
+        kustomize.component: centraldashboard
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+      - env:
+        - name: LOGOUT_URL
+          value: /oauth2/sign_out
+        - name: USERID_HEADER
+          value: kubeflow-userid
+        - name: USERID_PREFIX
+          value: ""
+        - name: PROFILES_KFAM_SERVICE_HOST
+          value: profiles-kfam.kubeflow
+        - name: REGISTRATION_FLOW
+          value: "false"
+        - name: DASHBOARD_CONFIGMAP
+          value: centraldashboard-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: COLLECT_METRICS
+          valueFrom:
+            configMapKeyRef:
+              name: centraldashboard-parameters
+              key: CD_COLLECT_METRICS
+        image: ghcr.io/kubeflow/kubeflow/central-dashboard:v1.10.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8082
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        name: centraldashboard
+        ports:
+        - containerPort: 8082
+          protocol: TCP
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: true
+          runAsUser: 1000
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: centraldashboard
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  labels:
+    app: centraldashboard
+    app.kubernetes.io/component: centraldashboard
+    app.kubernetes.io/name: centraldashboard
+    kustomize.component: centraldashboard
+  name: centraldashboard
+  namespace: kubeflow
+spec:
+  gateways:
+  - kubeflow-gateway
+  hosts:
+  - '*'
+  http:
+  - match:
+    - uri:
+        prefix: /
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: centraldashboard.kubeflow.svc.cluster.local
+        port:
+          number: 80
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  labels:
+    app: centraldashboard
+    app.kubernetes.io/component: centraldashboard
+    app.kubernetes.io/name: centraldashboard
+    kustomize.component: centraldashboard
+  name: central-dashboard
+  namespace: kubeflow
+spec:
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals:
+        - cluster.local/ns/istio-system/sa/istio-ingressgateway
+  selector:
+    matchLabels:
+      app: centraldashboard

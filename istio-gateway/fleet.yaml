@@ -1,0 +1,60 @@
+# Istio Ingress Gateway Bundle
+# Deploys Istio ingress gateway for Kubeflow
+name: istio-gateway
+defaultNamespace: istio-system
+
+# Depends on istiod control plane
+dependsOn:
+- name: istiod
+
+helm:
+  releaseName: istio-ingressgateway
+  repo: https://istio-release.storage.googleapis.com/charts
+  chart: gateway
+  version: "1.28.0"
+  values:
+    # Single replica for lab
+    replicaCount: 1
+    autoscaling:
+      enabled: false
+
+    # Service configuration - NodePort for local/lab deployment
+    service:
+      type: NodePort
+      ports:
+      - name: status-port
+        port: 15021
+        targetPort: 15021
+      - name: http2
+        port: 80
+        targetPort: 80
+        nodePort: 30080
+      - name: https
+        port: 443
+        targetPort: 443
+        nodePort: 30443
+
+    # Resources for lab environment
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+    # Labels required for Kubeflow gateway routing
+    labels:
+      app: istio-ingressgateway
+      istio: ingressgateway
+
+# Target clusters with kubeflow label
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: istio

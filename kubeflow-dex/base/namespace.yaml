@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: auth
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    pod-security.kubernetes.io/enforce: restricted
+  annotations:
+    meta.helm.sh/release-name: kubeflow-dex
+    meta.helm.sh/release-namespace: auth

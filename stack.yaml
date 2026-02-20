@@ -1,0 +1,519 @@
+apiVersion: suse.ai/v1alpha1
+kind: Stack
+metadata:
+  name: kubeflow
+spec:
+  category: ML Platform
+  description: End-to-end ML platform with pipelines, notebooks, and training.
+  displayName: Kubeflow
+  modules:
+    - moduleRef: cert-manager
+    - dependsOn:
+        - cert-manager
+      moduleRef: istio-system
+    - dependsOn:
+        - istio-system
+      moduleRef: istiod
+    - dependsOn:
+        - istiod
+      moduleRef: istio-gateway
+    - dependsOn:
+        - istio-gateway
+      moduleRef: kubeflow-namespace
+    - dependsOn:
+        - kubeflow-namespace
+      moduleRef: kubeflow-crds
+    - dependsOn:
+        - kubeflow-crds
+      moduleRef: kubeflow-base
+    - dependsOn:
+        - kubeflow-base
+      moduleRef: kubeflow-admission-webhook
+    - dependsOn:
+        - kubeflow-admission-webhook
+      moduleRef: kubeflow-knative-crds
+    - dependsOn:
+        - kubeflow-knative-crds
+      moduleRef: kubeflow-knative
+    - dependsOn:
+        - kubeflow-base
+      moduleRef: kubeflow-dex
+    - dependsOn:
+        - kubeflow-dex
+      moduleRef: kubeflow-oauth2-proxy
+    - dependsOn:
+        - kubeflow-oauth2-proxy
+      moduleRef: kubeflow-central-dashboard
+    - dependsOn:
+        - kubeflow-central-dashboard
+      moduleRef: kubeflow-profiles
+    - dependsOn:
+        - kubeflow-profiles
+      moduleRef: kubeflow-user-namespace
+    - dependsOn:
+        - kubeflow-central-dashboard
+      moduleRef: kubeflow-notebooks
+    - dependsOn:
+        - kubeflow-central-dashboard
+      moduleRef: kubeflow-tensorboards
+    - dependsOn:
+        - kubeflow-central-dashboard
+      moduleRef: kubeflow-pipelines
+    - dependsOn:
+        - kubeflow-pipelines
+      moduleRef: kubeflow-katib
+    - dependsOn:
+        - kubeflow-pipelines
+      moduleRef: kubeflow-training-operator
+    - dependsOn:
+        - kubeflow-pipelines
+      moduleRef: kubeflow-spark-operator
+    - dependsOn:
+        - kubeflow-knative
+        - kubeflow-training-operator
+      moduleRef: kubeflow-serving
+    - dependsOn:
+        - kubeflow-central-dashboard
+      moduleRef: kubeflow-prometheus-stack
+  source:
+    git:
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+      path: stack.yaml
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: infrastructure
+  name: cert-manager
+spec:
+  category: Infrastructure
+  dependsOn: []
+  description: Certificate management for Kubernetes
+  displayName: Cert Manager
+  source:
+    git:
+      path: cert-manager
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: cert-manager
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: infrastructure
+  name: istio-system
+spec:
+  category: Infrastructure
+  dependsOn:
+    - cert-manager
+  description: Istio service mesh base components
+  displayName: Istio Base
+  source:
+    git:
+      path: istio-system
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: istio-system
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: infrastructure
+  name: istiod
+spec:
+  category: Infrastructure
+  dependsOn:
+    - istio-system
+  description: Istio control plane
+  displayName: Istiod
+  source:
+    git:
+      path: istiod
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: istio-system
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: infrastructure
+  name: istio-gateway
+spec:
+  category: Infrastructure
+  dependsOn:
+    - istiod
+  description: Istio ingress gateway
+  displayName: Istio Gateway
+  source:
+    git:
+      path: istio-gateway
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: istio-system
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-namespace
+spec:
+  category: ML Platform
+  dependsOn:
+    - istio-gateway
+  description: Kubeflow namespace and base resources
+  displayName: Kubeflow Namespace
+  source:
+    git:
+      path: kubeflow-namespace
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: kubeflow
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-crds
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-namespace
+  description: Kubeflow Custom Resource Definitions
+  displayName: Kubeflow CRDs
+  source:
+    git:
+      path: kubeflow-crds
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: kubeflow
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-base
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-crds
+  description: Kubeflow base components and configuration
+  displayName: Kubeflow Base
+  source:
+    git:
+      path: kubeflow-base
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: kubeflow
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-admission-webhook
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-base
+  description: Kubeflow admission webhook for validation
+  displayName: Kubeflow Admission Webhook
+  source:
+    git:
+      path: kubeflow-admission-webhook
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: kubeflow
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-knative-crds
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-admission-webhook
+  description: Knative Custom Resource Definitions
+  displayName: Knative CRDs
+  source:
+    git:
+      path: kubeflow-knative-crds
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: knative-serving
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-knative
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-knative-crds
+  description: Knative serverless platform
+  displayName: Knative
+  source:
+    git:
+      path: kubeflow-knative
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: knative-serving
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-dex
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-base
+  description: Dex OIDC identity provider for Kubeflow
+  displayName: Dex Identity Provider
+  source:
+    git:
+      path: kubeflow-dex
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: auth
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-oauth2-proxy
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-dex
+  description: OAuth2 proxy for Kubeflow authentication
+  displayName: OAuth2 Proxy
+  source:
+    git:
+      path: kubeflow-oauth2-proxy
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: oauth2-proxy
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-central-dashboard
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-oauth2-proxy
+  description: Kubeflow central dashboard
+  displayName: Central Dashboard
+  source:
+    git:
+      path: kubeflow-central-dashboard
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: kubeflow
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-profiles
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-central-dashboard
+  description: Multi-tenancy and user namespace management
+  displayName: Kubeflow Profiles
+  source:
+    git:
+      path: kubeflow-profiles
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: kubeflow
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-user-namespace
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-profiles
+  description: Default user namespace for Kubeflow
+  displayName: User Namespace
+  source:
+    git:
+      path: kubeflow-user-namespace
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: kubeflow-user
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-notebooks
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-central-dashboard
+  description: Jupyter notebook server management
+  displayName: Jupyter Notebooks
+  source:
+    git:
+      path: kubeflow-notebooks
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: kubeflow
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-tensorboards
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-central-dashboard
+  description: TensorBoard visualization servers
+  displayName: TensorBoards
+  source:
+    git:
+      path: kubeflow-tensorboards
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: kubeflow
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-pipelines
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-central-dashboard
+  description: ML pipeline orchestration
+  displayName: Kubeflow Pipelines
+  source:
+    git:
+      path: kubeflow-pipelines
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: kubeflow
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-katib
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-pipelines
+  description: Hyperparameter tuning and AutoML
+  displayName: Katib
+  source:
+    git:
+      path: kubeflow-katib
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: kubeflow
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-training-operator
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-pipelines
+  description: Distributed ML training (TFJob, PyTorchJob)
+  displayName: Training Operator
+  source:
+    git:
+      path: kubeflow-training-operator
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: kubeflow
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-spark-operator
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-pipelines
+  description: Apache Spark on Kubernetes
+  displayName: Spark Operator
+  source:
+    git:
+      path: kubeflow-spark-operator
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: kubeflow
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-serving
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-knative
+    - kubeflow-training-operator
+  description: Model serving and inference
+  displayName: KServe / Model Serving
+  source:
+    git:
+      path: kubeflow-serving
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: kubeflow
+---
+apiVersion: suse.ai/v1alpha1
+kind: Module
+metadata:
+  labels:
+    suse.ai/category: ml-platform
+  name: kubeflow-prometheus-stack
+spec:
+  category: ML Platform
+  dependsOn:
+    - kubeflow-central-dashboard
+  description: Monitoring for Kubeflow components
+  displayName: Kubeflow Prometheus Stack
+  source:
+    git:
+      path: kubeflow-prometheus-stack
+      ref: master
+      url: https://github.com/stevenbecht/kubeflow-fleet
+  targetNamespace: monitoring

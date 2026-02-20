@@ -1,0 +1,32 @@
+# cert-manager Bundle
+# Deploys cert-manager for local TLS issuance
+name: cert-manager
+defaultNamespace: cert-manager
+
+helm:
+  releaseName: cert-manager
+  repo: https://charts.jetstack.io
+  chart: cert-manager
+  version: "v1.14.4"
+  values:
+    installCRDs: true
+    # Keep resource usage modest for single-node dev clusters
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+# Target clusters with kubeflow label
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: cert-manager

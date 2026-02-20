@@ -1,0 +1,21 @@
+# Kubeflow Profiles + KFAM
+name: kubeflow-profiles
+defaultNamespace: kubeflow
+
+dependsOn:
+- name: cert-manager
+- name: kubeflow-base
+- name: kubeflow-crds
+
+kustomize:
+  dir: .
+
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: profiles

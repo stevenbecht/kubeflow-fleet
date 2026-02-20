@@ -1,0 +1,19 @@
+# Kubeflow Spark Operator Bundle
+name: kubeflow-spark-operator
+defaultNamespace: kubeflow
+
+dependsOn:
+- name: kubeflow-base
+
+kustomize:
+  dir: .
+
+targetCustomizations:
+- name: default
+  clusterSelector:
+    matchLabels:
+      kubeflow: enabled
+
+labels:
+  app.kubernetes.io/part-of: kubeflow
+  app.kubernetes.io/component: spark-operator
